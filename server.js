@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
-// ??? C?U H�NH K?T N?I T? FILE .ENV (B?O M?T BI?N M�I TRU?NG)
+// CẤU HÌNH KẾT NỐI TỪ FILE .ENV
 const PORT = process.env.PORT || 3000;
 const N8N_HOST = process.env.N8N_HOST || 'http://localhost:5678';
 const N8N_KEY = process.env.N8N_KEY;
@@ -14,12 +14,12 @@ const WORKFLOW_ID = process.env.WORKFLOW_ID;
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:10001/soc_logs';
 
-// ?? K?T N?I MONGODB LOCAL
+// KẾT NỐI MONGODB LOCAL
 mongoose.connect(MONGO_URI)
   .then(() => console.log('[MongoDB] Da ket noi thanh cong toi Database soc_logs!'))
   .catch(err => console.error('[MongoDB Error] Loi ket noi MongoDB:', err.message));
 
-// Schema khuon mau luu lich su quet Hash
+// Schema khuôn mẫu lưu lịch sử quét Hash
 const scanLogSchema = new mongoose.Schema({
   file_hash: String,
   status: String,
@@ -27,7 +27,7 @@ const scanLogSchema = new mongoose.Schema({
 });
 const ScanLog = mongoose.model('ScanLog', scanLogSchema);
 
-// 1. API doc config workflow
+// 1. API đọc config workflow từ n8n
 app.get('/api/n8n/get-config', async (req, res) => {
     try {
         const response = await axios.get(${N8N_HOST}/api/v1/workflows/, {
@@ -42,7 +42,7 @@ app.get('/api/n8n/get-config', async (req, res) => {
     }
 });
 
-// 2. API quet hash + TU DONG LUU LICHSU VAO MONGODB
+// 2. API quét hash + TỰ ĐỘNG LƯU LỊCH SỬ VÀO MONGODB
 app.post('/api/n8n/scan-hash', async (req, res) => {
     try {
         const { hash } = req.body;
@@ -50,12 +50,12 @@ app.post('/api/n8n/scan-hash', async (req, res) => {
 
         console.log([BE] Dang gui hash  sang n8n webhook);
 
-        // G?i n8n x? l�
+        // Gửi n8n xử lý
         const scanResponse = await axios.post(n8nWebhookURL, {
             file_hash_sha256: hash
         });
 
-        // ?? T? �?NG LUU D�NG NH?T K� S? C? V�O MONGODB
+        // TỰ ĐỘNG LƯU DÒNG NHẬT KÝ SỰ CỐ VÀO MONGODB
         const newLog = new ScanLog({
             file_hash: hash,
             status: 'SENT_TO_SOAR_N8N'
@@ -74,7 +74,7 @@ app.post('/api/n8n/scan-hash', async (req, res) => {
     }
 });
 
-// 3. API XEM L?CH S? C�C L?N QU�T TRONG MONGODB
+// 3. API XEM LỊCH SỬ CÁC LẦN QUÉT TRONG MONGODB
 app.get('/api/history-logs', async (req, res) => {
     try {
         const logs = await ScanLog.find().sort({ scanned_at: -1 });
