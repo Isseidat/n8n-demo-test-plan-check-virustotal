@@ -19,7 +19,7 @@ services:
       - N8N_PROTOCOL=httpc
       - NODE_ENV=production
     volumes:
-      - n8n_storage:/home/node/.n8n
+      - n8n_data:/home/node/.n8n
     restart: always
 
   backend:
@@ -38,4 +38,5 @@ services:
 
 volumes:
   mongo_data:
-  n8n_storage:
+  n8n_data:
+    external: true

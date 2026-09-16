@@ -13,7 +13,8 @@
   "paths": {
     "/api/n8n/get-config": {
       "get": {
-        "description": "",
+        "summary": "Đọc cấu hình Workflow từ n8n",
+        "description": "Lấy thông tin thiết lập và danh sách các node hiện tại của n8n Workflow",
         "responses": {
           "200": {
             "description": "OK"
@@ -26,7 +27,8 @@
     },
     "/api/n8n/scan-hash": {
       "post": {
-        "description": "",
+        "summary": "Gửi mã Hash SHA256 để quét virus và lưu log",
+        "description": "Truyền mã SHA256 sang n8n Webhook để phân tích VirusTotal và tự động ghi nhật ký vào MongoDB",
         "parameters": [
           {
             "name": "body",
@@ -53,7 +55,8 @@
     },
     "/api/history-logs": {
       "get": {
-        "description": "",
+        "summary": "Xem lịch sử các lần quét mã Hash trong MongoDB",
+        "description": "Lấy danh sách toàn bộ các nhật ký sự cố đã từng quét được lưu trong CSDL MongoDB",
         "responses": {
           "200": {
             "description": "OK"
