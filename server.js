@@ -1,4 +1,5 @@
-﻿require('dotenv').config();
+require('dotenv').config();
+global.crypto = require('crypto');
 const express = require('express');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -6,20 +7,17 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
-// CẤU HÌNH KẾT NỐI TỪ FILE .ENV
 const PORT = process.env.PORT || 3000;
-const N8N_HOST = process.env.N8N_HOST || 'http://localhost:5678';
+const N8N_HOST = process.env.N8N_HOST || 'http://127.0.0.1:5678';
 const N8N_KEY = process.env.N8N_KEY;
 const WORKFLOW_ID = process.env.WORKFLOW_ID;
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:10001/soc_logs';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || (N8N_HOST + '/webhook/a115fb35-380c-4777-8bf3-81f268e638e9');
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:10001/soc_logs';
 
-// KẾT NỐI MONGODB LOCAL
 mongoose.connect(MONGO_URI)
   .then(() => console.log('[MongoDB] Da ket noi thanh cong toi Database soc_logs!'))
   .catch(err => console.error('[MongoDB Error] Loi ket noi MongoDB:', err.message));
 
-// Schema khuôn mẫu lưu lịch sử quét Hash
 const scanLogSchema = new mongoose.Schema({
   file_hash: String,
   status: String,
@@ -27,10 +25,9 @@ const scanLogSchema = new mongoose.Schema({
 });
 const ScanLog = mongoose.model('ScanLog', scanLogSchema);
 
-// 1. API đọc config workflow từ n8n
 app.get('/api/n8n/get-config', async (req, res) => {
     try {
-        const response = await axios.get(${N8N_HOST}/api/v1/workflows/, {
+        const response = await axios.get(N8N_HOST + '/api/v1/workflows/' + WORKFLOW_ID, {
             headers: { 'X-N8N-API-KEY': N8N_KEY }
         });
 
@@ -42,26 +39,21 @@ app.get('/api/n8n/get-config', async (req, res) => {
     }
 });
 
-// 2. API quét hash + TỰ ĐỘNG LƯU LỊCH SỬ VÀO MONGODB
 app.post('/api/n8n/scan-hash', async (req, res) => {
     try {
         const { hash } = req.body;
-        const n8nWebhookURL = N8N_WEBHOOK_URL || ${N8N_HOST}/webhook/a115fb35-380c-4777-8bf3-81f268e638e9;
+        console.log('[BE] Dang gui hash ' + hash + ' sang n8n webhook');
 
-        console.log([BE] Dang gui hash  sang n8n webhook);
-
-        // Gửi n8n xử lý
-        const scanResponse = await axios.post(n8nWebhookURL, {
+        const scanResponse = await axios.post(N8N_WEBHOOK_URL, {
             file_hash_sha256: hash
         });
 
-        // TỰ ĐỘNG LƯU DÒNG NHẬT KÝ SỰ CỐ VÀO MONGODB
         const newLog = new ScanLog({
             file_hash: hash,
             status: 'SENT_TO_SOAR_N8N'
         });
         await newLog.save();
-        console.log([MongoDB] Da luu vet hash  vao database!);
+        console.log('[MongoDB] Da luu vet hash ' + hash + ' vao database!');
 
         res.json({
             message: 'Gui hash sang n8n va luu vao MongoDB thanh cong',
@@ -74,7 +66,6 @@ app.post('/api/n8n/scan-hash', async (req, res) => {
     }
 });
 
-// 3. API XEM LỊCH SỬ CÁC LẦN QUÉT TRONG MONGODB
 app.get('/api/history-logs', async (req, res) => {
     try {
         const logs = await ScanLog.find().sort({ scanned_at: -1 });
@@ -88,8 +79,8 @@ app.get('/api/history-logs', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(Server Backend dang chay tai http://localhost:);
-    console.log(GET  http://localhost:/api/n8n/get-config (Doc cau hinh Workflow));
-    console.log(POST http://localhost:/api/n8n/scan-hash (Quet & Luu MongoDB));
-    console.log(GET  http://localhost:/api/history-logs (Xem lich su MongoDB));
+    console.log('Server Backend dang chay tai http://localhost:' + PORT);
+    console.log('GET  http://localhost:' + PORT + '/api/n8n/get-config (Doc cau hinh Workflow)');
+    console.log('POST http://localhost:' + PORT + '/api/n8n/scan-hash (Quet & Luu MongoDB)');
+    console.log('GET  http://localhost:' + PORT + '/api/history-logs (Xem lich su MongoDB)');
 });
