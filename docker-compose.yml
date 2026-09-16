@@ -1,0 +1,41 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: soar_mongo_10001
+    ports:
+      - 10001:27017
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: soar_n8n
+    ports:
+      - 5678:5678
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=httpc
+      - NODE_ENV=production
+    volumes:
+      - n8n_storage:/home/node/.n8n
+    restart: always
+
+  backend:
+    build: .
+    container_name: soar_backend
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+      - N8N_HOST=http://n8n:5678
+      - MONGO_URI=mongodb://mongodb:27017/soc_logs
+    depends_on:
+      - mongodb
+      - n8n
+    restart: always
+
+volumes:
+  mongo_data:
+  n8n_storage:
