@@ -2,9 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 const app = express();
 app.use(express.json());
+
+// 📜 TÍCH HỢP GIAO DIỆN SWAGGER UI DỰ ÁN
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get('/', (req, res) => res.redirect('/api-docs'));
 
 // 🗝️ CẤU HÌNH KẾT NỐI TỪ FILE .ENV (BẢO MẬT BIẾN MÔI TRƯỜNG)
 const PORT = process.env.PORT || 3000;
@@ -91,6 +97,7 @@ app.get('/api/history-logs', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server Backend dang chay tai http://localhost:${PORT}`);
+    console.log(`Giao dien Swagger UI tai: http://localhost:${PORT}/api-docs`);
     console.log(`GET  http://localhost:${PORT}/api/n8n/get-config (Doc cau hinh Workflow)`);
     console.log(`POST http://localhost:${PORT}/api/n8n/scan-hash (Quet & Luu MongoDB)`);
     console.log(`GET  http://localhost:${PORT}/api/history-logs (Xem lich su MongoDB)`);
