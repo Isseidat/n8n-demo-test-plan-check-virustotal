@@ -1,1 +1,16 @@
-Đây là txt sạch
+**Đọc cấu hình Workflow của n8n
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/n8n/get-config" -Method Get
+
+**Gửi mã test
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/n8n/scan-hash" -Method Post -ContentType "application/json" -Body '{"hash": "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"}'
+
+demo fake: 0000000000000000000000000000000000000000000000000000000000000000
+wanna cry: 055c7760512c98c8d51e4427227fe2a7ea3b34ee63178fe78631fa8aa6d15622
+MountLocker: 226a723ffb4a91d9950a8b266167c5b354ab0db1dc225578494917fe53867ef2
+Dridex: 178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1
+
+**Xem danh sách lịch sử các lần quét trong MongoDB
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/history-logs" -Method Get
